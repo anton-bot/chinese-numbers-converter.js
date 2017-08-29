@@ -17,6 +17,12 @@ new ChineseNumber('卅六').toInteger(); // 36 - Cantonese slang
 new ChineseNumber('1000 and one').toInteger(); // 1000 - ignore non-Chinese words
 ```
 
+### Possible unexpected results ###
+
+```js
+new ChineseNumber(' 二百 or 兩百').toInteger(); // 400 - do not try to parse multiple numbers at once
+```
+
 ## Availability ##
 
 - Standalone JS class - `chinese-numbers.js`
