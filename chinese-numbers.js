@@ -80,6 +80,7 @@ ChineseNumber.numbers = {
   '億': '*100000000',
   '亿': '*100000000',
 };
+ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
 
 /**
  * Returns the result of the conversion of Chinese number into an `Integer`.
@@ -161,4 +162,25 @@ ChineseNumber.prototype.toInteger = function () {
   }
 
   return result;
+};
+
+/**
+ *
+ * @returns {boolean} True if the `character` is a Chinese or Arabic number
+ *    or a character like "comma" and "space", which should not delimit two 
+ *    numbers; rather, they mean that the number may continue. E.g. "6,000" or
+ *    "6 000".
+ */
+ChineseNumber.isNumberOrSpace = function (character) {
+  // Check for Arabic numbers, commas and spaces:
+  if (character.match(/[0-9,\s]/)) {
+    return true;
+  }
+
+  // Check if the character is on the list of Chinese number characters:
+  if (ChineseNumber.characters.indexOf(character) === -1) {
+    return false;
+  } else {
+    return true;
+  }
 }

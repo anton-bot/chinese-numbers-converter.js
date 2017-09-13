@@ -7,7 +7,10 @@ Supports Traditional, Simplified, Financial numbers and some dialects. Only inte
 
 ## Usage examples ##
 
-The `ChineseNumber` class contains only one method: `toInteger()`.
+The `ChineseNumber` class contains these methods: 
+
+- `toInteger()` - converts a Chinese or mixed number into Arabic.
+- `isNumberOrSpace()` - checks whether the character is part of a number (`true`) or unrelated text (`false`).
 
 ```js
 new ChineseNumber('兩百四十五').toInteger(); // 245 - Normal number
