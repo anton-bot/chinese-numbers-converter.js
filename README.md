@@ -9,7 +9,8 @@ Supports Traditional, Simplified, Financial numbers and some dialects. Only inte
 
 The `ChineseNumber` class contains these methods: 
 
-- `toInteger()` - converts a Chinese or mixed number into Arabic.
+- `toInteger()` - converts a Chinese or mixed number into Arabic and returns a JavaScript `Number` type.
+- `toArabicString()` - translates the entire string (possibly with multiple numbers in it) and returns the same string, but with Arabic numbers.
 - `isNumberOrSpace()` - checks whether the character is part of a number (`true`) or unrelated text (`false`).
 
 ```js

@@ -107,8 +107,8 @@ ChineseNumber.prototype.toInteger = function () {
 
   // Now parse the actual Chinese, character by character:
   for (var i = 0; i < len; i++) {
-    if (this.numbers[str[i]] !== undefined) {
-      var arabic = this.numbers[str[i]]; // e.g. for '三', get 3
+    if (ChineseNumber.numbers[str[i]] !== undefined) {
+      var arabic = ChineseNumber.numbers[str[i]]; // e.g. for '三', get 3
 
       if (typeof (arabic) === 'number') {
         if (currentPair.length !== 0) {
@@ -192,3 +192,59 @@ ChineseNumber.isNumberOrSpace = function (character) {
     return true;
   }
 }
+
+/**
+ * Converts multiple Chinese numbers in a string into Arabic numbers, and
+ * returns the translated string containing the original text but with Arabic
+ * numbers only.
+ * @returns {string} The translated string with Arabic numbers only.
+ */
+ChineseNumber.prototype.toArabicString = function () {
+  /**
+   *  This will be the result of this function, the string will all Chinese
+   *  numbers translated to Arabic.
+   */
+  var translated = '';
+
+  /**
+   * Temporary variable to accumulate the Chinese number discovered within a
+   * string.
+   */
+  var chineseNumber = '';
+
+  /** Whether the character in the previous loop iteration was a number. */
+  var previousCharacterIsNumber = false;
+
+
+  // Loop over each character in the string and: 
+  // - if it's a normal character, just keep looping and adding characters to
+  //   the translated string.
+  // - if it's a number, keep looping until we find the first non-number
+  //   character. Then, translate the entire chineseNumber string into an
+  //   Arabic number and place it back into the translated string.
+  this.source.split('').forEach(function (character) {
+    if (ChineseNumber.isNumberOrSpace(character)) {
+      chineseNumber += character;
+      previousCharacterIsNumber = true;
+    } else {
+      if (previousCharacterIsNumber) {
+        // We reached the end of a Chinese number. Send it for translation now:
+        translated += new ChineseNumber(chineseNumber).toInteger();
+      }
+
+      translated += character;
+
+      // Reset variables:
+      chineseNumber = '';
+      previousCharacterIsNumber = false;
+    }
+  });
+
+  // If the string ends with a number, we didn't trigger the translation of the
+  // last bit yet. So translate it now.
+  if (chineseNumber) {
+    translated += new ChineseNumber(chineseNumber).toInteger();
+  }
+
+  return translated;
+};
