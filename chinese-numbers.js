@@ -9,82 +9,83 @@ var ChineseNumber = function (source) {
   return this;
 };
 
+/** Chinese number characters and their Arabic equivalent. */
+ChineseNumber.numbers = {
+  '零': 0,
+  '〇': 0,
+  '０': 0,
+  '洞': 0,
+
+  '壹': 1,
+  '一': 1,
+  '幺': 1,
+  '１': 1,
+
+  '貳': 2,
+  '贰': 2,
+  '二': 2,
+  '两': 2,
+  '兩': 2,
+  '２': 2,
+
+  '參': 3,
+  '叁': 3,
+  '三': 3,
+  '仨': 3,
+  '３': 3,
+
+
+  '肆': 4,
+  '四': 4,
+  '４': 4,
+
+  '伍': 5,
+  '五': 5,
+  '５': 5,
+
+  '陸': 6,
+  '陆': 6,
+  '六': 6,
+  '６': 6,
+
+  '柒': 7,
+  '七': 7,
+  '拐': 7,
+  '７': 7,
+
+  '捌': 8,
+  '八': 8,
+  '８': 8,
+
+  '玖': 9,
+  '九': 9,
+  '勾': 9,
+  '９': 9,
+
+  '拾': '*10',
+  '十': '*10',
+  '呀': '*10',
+  '廿': '*20',
+  '卅': '*30',
+  '卌': '*40',
+  '佰': '*100',
+  '百': '*100',
+  '皕': '*200',
+  '仟': '*1000',
+  '千': '*1000',
+  '萬': '*10000',
+  '萬': '*10000',
+  '万': '*10000',
+  '億': '*100000000',
+  '億': '*100000000',
+  '亿': '*100000000',
+};
+
 /**
  * Returns the result of the conversion of Chinese number into an `Integer`.
  * @returns {number} The Chinese number converted to integer.
  */
 ChineseNumber.prototype.toInteger = function () {
-  var numbers = {
-    '零': 0,
-    '〇': 0,
-    '０': 0,
-    '洞': 0,
-
-    '壹': 1,
-    '一': 1,
-    '幺': 1,
-    '１': 1,
-
-    '貳': 2,
-    '贰': 2,
-    '二': 2,
-    '两': 2,
-    '兩': 2,
-    '２': 2,
-
-    '參': 3,
-    '叁': 3,
-    '三': 3,
-    '仨': 3,
-    '３': 3,
-    
-
-    '肆': 4,
-    '四': 4,
-    '４': 4,
-
-    '伍': 5,
-    '五': 5,
-    '５': 5,
-
-    '陸': 6,
-    '陆': 6,
-    '六': 6,
-    '６': 6,
-
-    '柒': 7,
-    '七': 7,
-    '拐': 7,
-    '７': 7,
-
-    '捌': 8,
-    '八': 8,
-    '８': 8,
-
-    '玖': 9,
-    '九': 9,
-    '勾': 9,
-    '９': 9,
-
-    '拾': '*10',
-    '十': '*10',
-    '呀': '*10',
-    '廿': '*20',
-    '卅': '*30',
-    '卌': '*40',
-    '佰': '*100',
-    '百': '*100',
-    '皕': '*200',
-    '仟': '*1000',
-    '千': '*1000',
-    '萬': '*10000',
-    '萬': '*10000',
-    '万': '*10000',
-    '億': '*100000000',
-    '億': '*100000000',
-    '亿': '*100000000',
-  };
-
   var result = 0;
   var pairs = [];
   var len = this.source.length;
@@ -105,8 +106,8 @@ ChineseNumber.prototype.toInteger = function () {
 
   // Now parse the actual Chinese, character by character:
   for (var i = 0; i < len; i++) {
-    if (numbers[str[i]] !== undefined) {
-      var arabic = numbers[str[i]]; // e.g. for '三', get 3
+    if (this.numbers[str[i]] !== undefined) {
+      var arabic = this.numbers[str[i]]; // e.g. for '三', get 3
 
       if (typeof (arabic) === 'number') {
         if (currentPair.length !== 0) {
