@@ -1,5 +1,5 @@
 # chinese-numbers-converter.js
-Small library that converts Chinese numbers into arabic `Number`, such as 兩百四十五 into 245.
+Small library that converts Chinese numbers into arabic `Number`, such as 兩百四十五 into `245`.
 
 ## Language support ##
 
