@@ -81,6 +81,7 @@ ChineseNumber.numbers = {
   '亿': '*100000000',
 };
 ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
+ChineseNumber.afterManMultipliers = ['萬', '萬', '万', '億', '億', '亿'];
 
 /**
  * Returns the result of the conversion of Chinese number into an `Integer`.
@@ -89,7 +90,6 @@ ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
 ChineseNumber.prototype.toInteger = function () {
   var result = 0;
   var pairs = [];
-  var len = this.source.length;
   var str = this.source.toString();
   var currentPair = [];
 
@@ -106,6 +106,7 @@ ChineseNumber.prototype.toInteger = function () {
   }
 
   // Now parse the actual Chinese, character by character:
+  var len = str.length;
   for (var i = 0; i < len; i++) {
     if (ChineseNumber.numbers[str[i]] !== undefined) {
       var arabic = ChineseNumber.numbers[str[i]]; // e.g. for '三', get 3
@@ -131,10 +132,27 @@ ChineseNumber.prototype.toInteger = function () {
         if (currentPair.length === 2) {
           pairs.push(currentPair);
           currentPair = [];
-        } else if (currentPair.length === 1) { // e.g. 十 in 十二
-          currentPair.push(1);
-          pairs.push(currentPair);
-          currentPair = [];
+        } else if (currentPair.length === 1) {
+          if (ChineseNumber.afterManMultipliers.indexOf(str[i]) !== -1) {
+            // For cases like '萬' in '一千萬' - multiply everything we had
+            // so far (like 一千) by the current digit (like 萬).
+            // The leadingNumber is for cases like 1000萬.
+            var numbersSoFar = leadingNumber || 0;
+            leadingNumber = NaN;
+
+            pairs.forEach(function (pair) {
+              numbersSoFar += pair[0] * pair[1];
+            });
+
+            // Replace all previous pairs with the new one:
+            pairs = [[numbersSoFar, arabic]]; // e.g. [[1000, 10000]]
+            currentPair = [];
+          } else {
+            // For cases like 十 in 十二:
+            currentPair.push(1);
+            pairs.push(currentPair);
+            currentPair = [];
+          }
         }
       }
     }
