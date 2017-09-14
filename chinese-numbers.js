@@ -236,6 +236,36 @@ ChineseNumber.isChineseNumber = function (character) {
   return ChineseNumber.characters.indexOf(character) !== -1;
 };
 
+
+/**
+ * Checks whether a character is an Arabic number [0-9] and not a Chinese
+ * number or another character.
+ * @returns {boolean} True if character is from 0 to 9.
+ */
+ChineseNumber.isArabicNumber = function (character) {
+  if (character === null || character === undefined || character.toString().length !== 1) {
+    throw 'Function isArabicNumber expects exactly one character.';
+  }
+
+  var arabicNumbers = '0123456789０１２３４５６７８９';
+  return arabicNumbers.indexOf(character) !== -1; // true if found
+};
+
+/**
+ * Checks whether the character is a comma or space, i.e. a character that
+ * can occur within a number (1,000,000) but is not a number itself.
+ * @returns {boolean} True if the character is a comma or space.
+ */
+ChineseNumber.isCommaOrSpace = function (character) {
+  if (character === null || character === undefined || character.toString().length !== 1) {
+    throw 'Function isCommaOrSpace expects exactly one character.';
+  }
+
+  var charactersWithinNumber = ', ';
+
+  return charactersWithinNumber.indexOf(character) !== -1;
+};
+
 /**
  * Converts multiple Chinese numbers in a string into Arabic numbers, and
  * returns the translated string containing the original text but with Arabic
@@ -342,33 +372,4 @@ ChineseNumber.prototype.toArabicString = function () {
   }
 
   return translated;
-};
-
-/**
- * Checks whether a character is an Arabic number [0-9] and not a Chinese
- * number or another character.
- * @returns {boolean} True if character is from 0 to 9.
- */
-ChineseNumber.isArabicNumber = function (character) {
-  if (character === null || character === undefined || character.toString().length !== 1) {
-    throw 'Function isArabicNumber expects exactly one character.';
-  }
-
-  var arabicNumbers = '0123456789０１２３４５６７８９';
-  return arabicNumbers.indexOf(character) !== -1; // true if found
-};
-
-/**
- * Checks whether the character is a comma or space, i.e. a character that
- * can occur within a number (1,000,000) but is not a number itself.
- * @returns {boolean} True if the character is a comma or space.
- */
-ChineseNumber.isCommaOrSpace = function (character) {
-  if (character === null || character === undefined || character.toString().length !== 1) {
-    throw 'Function isCommaOrSpace expects exactly one character.';
-  }
-
-  var charactersWithinNumber = ', ';
-
-  return charactersWithinNumber.indexOf(character) !== -1;
 };
