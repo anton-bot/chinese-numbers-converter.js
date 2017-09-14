@@ -286,24 +286,43 @@ ChineseNumber.prototype.toArabicString = function () {
         // Immediately start assembling a new number, e.g. 800:
         chineseNumber = '';
         chineseNumber += character;
+
+        previousCharacterIsNumber = true;
+        previousCharacterIsChineseNumber = false;
       } else {
         // Normal case:
-        chineseNumber += character;
-      }
+        if (ChineseNumber.isCommaOrSpace(character)) {
+          // This is to prevent converting something like 'bot 959' into 'bot959',
+          // i.e. when the space or comma is the first character of a number.
+          // Do it only if it doesn't occur in the middle of a number, i.e.
+          // for 'bot 959' but not for '6,000,000'.
+          if (chineseNumber === '') {
+            translated += character;
+          } else {
+            // do nothing - swallow commas and spaces within a number
+          }
 
-      previousCharacterIsNumber = true;
-      previousCharacterIsChineseNumber = ChineseNumber.isChineseNumber(character);
+          previousCharacterIsNumber = false;
+          previousCharacterIsChineseNumber = false;
+        } else {
+          // Normal case:
+          chineseNumber += character;
+
+          previousCharacterIsNumber = true;
+          previousCharacterIsChineseNumber = ChineseNumber.isChineseNumber(character);
+        }
+      }
     } else {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
         clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
-        if (clearChineseNumber === '') {
+        if (clearChineseNumber === '' && chineseNumber.length === 1) {
           // If the 'number' we assembled is actually something like comma, 
-          // space, or multiple commas and spaces:
+          // space, or multiple commas and spaces, and occurs at the beginning:
           translated += chineseNumber;
         } else {
           // Normal case - it's a real number:
-          translated += new ChineseNumber(chineseNumber).toInteger();
+          translated += new ChineseNumber(clearChineseNumber).toInteger();
         }
       }
 
@@ -326,15 +345,30 @@ ChineseNumber.prototype.toArabicString = function () {
 };
 
 /**
- * Check whether a character is an Arabic number [0-9] and not a Chinese
+ * Checks whether a character is an Arabic number [0-9] and not a Chinese
  * number or another character.
  * @returns {boolean} True if character is from 0 to 9.
  */
-ChineseNumber.isArabicNumber = function (numberToCheck) {
-  if (numberToCheck === null || numberToCheck === undefined || numberToCheck.toString().length !== 1) {
+ChineseNumber.isArabicNumber = function (character) {
+  if (character === null || character === undefined || character.toString().length !== 1) {
     throw 'Function isArabicNumber expects exactly one character.';
   }
 
   var arabicNumbers = '0123456789０１２３４５６７８９';
-  return arabicNumbers.indexOf(numberToCheck) !== -1; // true if found
+  return arabicNumbers.indexOf(character) !== -1; // true if found
+};
+
+/**
+ * Checks whether the character is a comma or space, i.e. a character that
+ * can occur within a number (1,000,000) but is not a number itself.
+ * @returns {boolean} True if the character is a comma or space.
+ */
+ChineseNumber.isCommaOrSpace = function (character) {
+  if (character === null || character === undefined || character.toString().length !== 1) {
+    throw 'Function isCommaOrSpace expects exactly one character.';
+  }
+
+  var charactersWithinNumber = ', ';
+
+  return charactersWithinNumber.indexOf(character) !== -1;
 };
