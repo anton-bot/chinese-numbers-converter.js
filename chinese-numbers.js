@@ -210,7 +210,7 @@ ChineseNumber.isNumberOrSpace = function (character) {
   }
 
   // Check for Arabic numbers, commas and spaces:
-  if (character.match(/[0-9,\s]/)) {
+  if (character.match(/[0-9,.\s]/)) {
     return true;
   }
 
@@ -261,7 +261,7 @@ ChineseNumber.isCommaOrSpace = function (character) {
     throw 'Function isCommaOrSpace expects exactly one character.';
   }
 
-  var charactersWithinNumber = ', ';
+  var charactersWithinNumber = ',. ';
 
   return charactersWithinNumber.indexOf(character) !== -1;
 };
@@ -270,9 +270,15 @@ ChineseNumber.isCommaOrSpace = function (character) {
  * Converts multiple Chinese numbers in a string into Arabic numbers, and
  * returns the translated string containing the original text but with Arabic
  * numbers only.
+ * @param {number} [minimumCharactersInNumber] - Optionally, how many
+ *    characters minimum must be in a number to be converted. Sometimes a
+ *    good setting would be 2, because otherwise we will convert geographic
+ *    names like 九龍站 into 9龍站.
  * @returns {string} The translated string with Arabic numbers only.
  */
-ChineseNumber.prototype.toArabicString = function () {
+ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
+  minimumCharactersInNumber = minimumCharactersInNumber || 0;
+
   /**
    *  This will be the result of this function, the string will all Chinese
    *  numbers translated to Arabic.
@@ -308,10 +314,17 @@ ChineseNumber.prototype.toArabicString = function () {
         // current character is an Arabic number.
 
         // First, translate the number accumulated so far, e.g. 1000萬
-        translated += new ChineseNumber(chineseNumber).toInteger();
+        if (chineseNumber.length >= minimumCharactersInNumber) {
+          translated += new ChineseNumber(chineseNumber).toInteger();
 
-        // Add a space, otherwise 1000萬800呎 will become 10000000800呎
-        translated += ' ';
+          // Add a space, otherwise 1000萬800呎 will become 10000000800呎
+          translated += ' ';
+        } else {
+          // If `minimumCharactersInNumber` is set, do not translate short
+          // numbers, e.g. shorter than 2 characters, in order to avoid
+          // translating geographic names like 九龍站 into 9龍站.
+          translated += chineseNumber;
+        }
 
         // Immediately start assembling a new number, e.g. 800:
         chineseNumber = '';
@@ -352,7 +365,14 @@ ChineseNumber.prototype.toArabicString = function () {
           translated += chineseNumber;
         } else {
           // Normal case - it's a real number:
-          translated += new ChineseNumber(clearChineseNumber).toInteger();
+          if (clearChineseNumber.length >= minimumCharactersInNumber) {
+            translated += new ChineseNumber(clearChineseNumber).toInteger();
+          } else {
+            // If `minimumCharactersInNumber` is set, do not translate short
+            // numbers, e.g. shorter than 2 characters, in order to avoid
+            // translating geographic names like 九龍站 into 9龍站.
+            translated += clearChineseNumber;
+          }
         }
       }
 
