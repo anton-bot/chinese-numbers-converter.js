@@ -223,6 +223,20 @@ ChineseNumber.isNumberOrSpace = function (character) {
 }
 
 /**
+ * Checks whether a character is a Chinese number character.
+ * @param {number|string} A single character to be checked.
+ * @returns {boolean} True if it's a Chinese number character or Chinese-style
+ * Arabic numbers (０-９).
+ */
+ChineseNumber.isChineseNumber = function (character) {
+  if (character === null || character === undefined || character.toString().length !== 1) {
+    throw 'Function isChineseNumber expects exactly one character.';
+  }
+
+  return ChineseNumber.characters.indexOf(character) !== -1;
+};
+
+/**
  * Converts multiple Chinese numbers in a string into Arabic numbers, and
  * returns the translated string containing the original text but with Arabic
  * numbers only.
@@ -244,6 +258,10 @@ ChineseNumber.prototype.toArabicString = function () {
   /** Whether the character in the previous loop iteration was a number. */
   var previousCharacterIsNumber = false;
 
+  /** Whether the character in the previous loop iteration was a Chinese
+      number. This is because we want to determine the border between two
+      numbers such as 1000萬800呎. */
+  var previousCharacterIsChineseNumber = false;
 
   // Loop over each character in the string and: 
   // - if it's a normal character, just keep looping and adding characters to
@@ -253,8 +271,28 @@ ChineseNumber.prototype.toArabicString = function () {
   //   Arabic number and place it back into the translated string.
   this.source.split('').forEach(function (character) {
     if (ChineseNumber.isNumberOrSpace(character)) {
-      chineseNumber += character;
+      if (previousCharacterIsChineseNumber && ChineseNumber.isChineseNumber(character) === false) {
+        // Special case: we are trying to determine a border between two mixed
+        // Arabic+Chinese numbers, such as 1000萬<we are here>800呎.
+        // Now we found that previous character was a Chinese number, but the
+        // current character is an Arabic number.
+
+        // First, translate the number accumulated so far, e.g. 1000萬
+        translated += new ChineseNumber(chineseNumber).toInteger();
+
+        // Add a space, otherwise 1000萬800呎 will become 10000000800呎
+        translated += ' ';
+
+        // Immediately start assembling a new number, e.g. 800:
+        chineseNumber = '';
+        chineseNumber += character;
+      } else {
+        // Normal case:
+        chineseNumber += character;
+      }
+
       previousCharacterIsNumber = true;
+      previousCharacterIsChineseNumber = ChineseNumber.isChineseNumber(character);
     } else {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
@@ -266,6 +304,7 @@ ChineseNumber.prototype.toArabicString = function () {
       // Reset variables:
       chineseNumber = '';
       previousCharacterIsNumber = false;
+      previousCharacterIsChineseNumber = false;
     }
   });
 
@@ -276,4 +315,18 @@ ChineseNumber.prototype.toArabicString = function () {
   }
 
   return translated;
+};
+
+/**
+ * Check whether a character is an Arabic number [0-9] and not a Chinese
+ * number or another character.
+ * @returns {boolean} True if character is from 0 to 9.
+ */
+ChineseNumber.isArabicNumber = function (numberToCheck) {
+  if (numberToCheck === null || numberToCheck === undefined || numberToCheck.toString().length !== 1) {
+    throw 'Function isArabicNumber expects exactly one character.';
+  }
+
+  var arabicNumbers = '0123456789０１２３４５６７８９';
+  return arabicNumbers.indexOf(numberToCheck) !== -1; // true if found
 };
