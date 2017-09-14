@@ -296,7 +296,15 @@ ChineseNumber.prototype.toArabicString = function () {
     } else {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
-        translated += new ChineseNumber(chineseNumber).toInteger();
+        clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
+        if (clearChineseNumber === '') {
+          // If the 'number' we assembled is actually something like comma, 
+          // space, or multiple commas and spaces:
+          translated += chineseNumber;
+        } else {
+          // Normal case - it's a real number:
+          translated += new ChineseNumber(chineseNumber).toInteger();
+        }
       }
 
       translated += character;
