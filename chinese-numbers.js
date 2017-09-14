@@ -128,30 +128,41 @@ ChineseNumber.prototype.toInteger = function () {
 
         currentPair.push(arabic);
 
-        // accumulated two parts of a pair which will be multipled, e.g. 二 + 十
-        if (currentPair.length === 2) {
+        if (i === 0 && action === '*') {
+          // This is a case like 2千萬", where the first character will be 千:
+          currentPair.push(1);
           pairs.push(currentPair);
           currentPair = [];
-        } else if (currentPair.length === 1) {
-          if (ChineseNumber.afterManMultipliers.indexOf(str[i]) !== -1) {
-            // For cases like '萬' in '一千萬' - multiply everything we had
-            // so far (like 一千) by the current digit (like 萬).
-            // The leadingNumber is for cases like 1000萬.
-            var numbersSoFar = leadingNumber || 0;
-            leadingNumber = NaN;
-
-            pairs.forEach(function (pair) {
-              numbersSoFar += pair[0] * pair[1];
-            });
-
-            // Replace all previous pairs with the new one:
-            pairs = [[numbersSoFar, arabic]]; // e.g. [[1000, 10000]]
-            currentPair = [];
-          } else {
-            // For cases like 十 in 十二:
-            currentPair.push(1);
+        } else {
+          // accumulated two parts of a pair which will be multipled, e.g. 二 + 十
+          if (currentPair.length === 2) {
             pairs.push(currentPair);
             currentPair = [];
+          } else if (currentPair.length === 1) {
+            if (ChineseNumber.afterManMultipliers.indexOf(str[i]) !== -1) {
+              // For cases like '萬' in '一千萬' - multiply everything we had
+              // so far (like 一千) by the current digit (like 萬).
+              var numbersSoFar = 0;
+
+              pairs.forEach(function (pair) {
+                numbersSoFar += pair[0] * pair[1];
+              });
+
+              // The leadingNumber is for cases like 1000萬.
+              if (!isNaN(leadingNumber)) {
+                numbersSoFar *= leadingNumber;
+                leadingNumber = NaN;
+              }
+
+              // Replace all previous pairs with the new one:
+              pairs = [[numbersSoFar, arabic]]; // e.g. [[1000, 10000]]
+              currentPair = [];
+            } else {
+              // For cases like 十 in 十二:
+              currentPair.push(1);
+              pairs.push(currentPair);
+              currentPair = [];
+            }
           }
         }
       }
