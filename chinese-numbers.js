@@ -393,3 +393,5 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
 
   return translated;
 };
+
+module.exports = ChineseNumber;

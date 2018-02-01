@@ -1,4 +1,5 @@
 # chinese-numbers-converter.js
+
 Small library that converts Chinese numbers into arabic `Number`, such as 兩百四十五 into `245`.
 
 ## Language support ##
@@ -32,10 +33,10 @@ new ChineseNumber(' 二百 or 兩百').toInteger(); // 400 - do not try to parse
 ## Availability ##
 
 - Standalone JS class - `chinese-numbers.js`
-- NPM package - coming soon
+- NPM package - `chinese-numbers-converter`
 
 ## License and contributing ##
 
-Public domain. You can do everything. 
+Unlicense / Public domain. You can do everything. 
 
 Pull requests and bug reports are welcome. 

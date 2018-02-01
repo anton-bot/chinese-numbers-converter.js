@@ -1,0 +1,38 @@
+{
+  "name": "chinese-numbers-converter",
+  "version": "1.0.2",
+  "description": "Converts Chinese numerals in a string into Arabic numerals.",
+  "main": "chinese-numbers.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/catcher-in-the-try/chinese-numbers-converter.js.git"
+  },
+  "keywords": [
+    "chinese",
+    "chinese-numbers",
+    "numbers",
+    "arabic",
+	"arabic-numbers",
+    "number",
+    "numbers-converter",
+    "convert",
+    "convert-numbers",
+    "chinese-numerals",
+    "numerals",
+    "cantonese",
+	"cantonese-numbers",
+	"cantonese-numerals",
+	"text-utils",
+	"utilities",
+	"asian-languages"
+  ],
+  "author": "Anton Ivanov <anton@ivanov.hk>",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js/issues"
+  },
+  "homepage": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js#readme"
+}
