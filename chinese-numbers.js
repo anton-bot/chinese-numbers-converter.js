@@ -73,9 +73,7 @@ ChineseNumber.numbers = {
   '仟': '*1000',
   '千': '*1000',
   '萬': '*10000',
-  '萬': '*10000',
   '万': '*10000',
-  '億': '*100000000',
   '億': '*100000000',
   '亿': '*100000000',
 };
@@ -101,7 +99,7 @@ ChineseNumber.prototype.toInteger = function () {
   var currentPair = [];
 
   if (str === null || str === undefined || str === '') {
-    throw 'Empty strings cannot be converted.';
+    throw new Error('Empty strings cannot be converted.');
   }
 
   str = str.replace(/[,\s]/g, ''); // remove commas, spaces
@@ -118,7 +116,7 @@ ChineseNumber.prototype.toInteger = function () {
   if (!isNaN(leadingNumber)) {
     str = str.replace(leadingNumber.toString(), '');
   }
-  
+
   // Now parse the actual Chinese, character by character:
   var len = str.length;
   for (var i = 0; i < len; i++) {
@@ -157,7 +155,7 @@ ChineseNumber.prototype.toInteger = function () {
               // For cases like '萬' in '一千萬' - multiply everything we had
               // so far (like 一千) by the current digit (like 萬).
               var numbersSoFar = 0;
-              
+
               pairs.forEach(function (pair) {
                 numbersSoFar += pair[0] * pair[1];
               });
@@ -183,7 +181,7 @@ ChineseNumber.prototype.toInteger = function () {
     }
   }
 
-  // If number ends in 1-9, e.g. 二十二, we have one number left behind - 
+  // If number ends in 1-9, e.g. 二十二, we have one number left behind -
   // add it too and multiply by 1:
   if (currentPair.length === 1) {
     currentPair.push(1);
@@ -213,14 +211,14 @@ ChineseNumber.prototype.toInteger = function () {
  * @param {string} character - A string containing only one character to be
  *    checked.
  * @returns {boolean} True if the `character` is a Chinese or Arabic number
- *    or a character like "comma" and "space", which should not delimit two 
+ *    or a character like "comma" and "space", which should not delimit two
  *    numbers; rather, they mean that the number may continue. E.g. "6,000" or
  *    "6 000".
  */
 ChineseNumber.isNumberOrSpace = function (character) {
   // Make sure `character`.length is exactly 1:
   if (character === null || character === undefined || character.length !== 1) {
-    throw 'isNumberOrSpace() must receive exactly one character for checking.';
+    throw new Error('isNumberOrSpace() must receive exactly one character for checking.');
   }
 
   // Check for Arabic numbers, commas and spaces:
@@ -244,12 +242,11 @@ ChineseNumber.isNumberOrSpace = function (character) {
  */
 ChineseNumber.isChineseNumber = function (character) {
   if (character === null || character === undefined || character.toString().length !== 1) {
-    throw 'Function isChineseNumber expects exactly one character.';
+    throw new Error('Function isChineseNumber expects exactly one character.');
   }
 
   return ChineseNumber.characters.indexOf(character) !== -1;
 };
-
 
 /**
  * Checks whether a character is an Arabic number [0-9] and not a Chinese
@@ -258,7 +255,7 @@ ChineseNumber.isChineseNumber = function (character) {
  */
 ChineseNumber.isArabicNumber = function (character) {
   if (character === null || character === undefined || character.toString().length !== 1) {
-    throw 'Function isArabicNumber expects exactly one character.';
+    throw new Error('Function isArabicNumber expects exactly one character.');
   }
 
   var arabicNumbers = '0123456789０１２３４５６７８９';
@@ -272,7 +269,7 @@ ChineseNumber.isArabicNumber = function (character) {
  */
 ChineseNumber.isCommaOrSpace = function (character) {
   if (character === null || character === undefined || character.toString().length !== 1) {
-    throw 'Function isCommaOrSpace expects exactly one character.';
+    throw new Error('Function isCommaOrSpace expects exactly one character.');
   }
 
   var charactersWithinNumber = ',. ';
@@ -313,12 +310,13 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
       numbers such as 1000萬800呎. */
   var previousCharacterIsChineseNumber = false;
 
-  // Loop over each character in the string and: 
+  // Loop over each character in the string and:
   // - if it's a normal character, just keep looping and adding characters to
   //   the translated string.
   // - if it's a number, keep looping until we find the first non-number
   //   character. Then, translate the entire chineseNumber string into an
   //   Arabic number and place it back into the translated string.
+  var clearChineseNumber;
   this.source.split('').forEach(function (character) {
     if (ChineseNumber.isNumberOrSpace(character)) {
       if (previousCharacterIsChineseNumber && ChineseNumber.isChineseNumber(character) === false) {
@@ -332,7 +330,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
           translated += new ChineseNumber(chineseNumber).toInteger();
 
           // Add a space, otherwise 1000萬800呎 will become 10000000800呎
-          translated += ' '; 
+          translated += ' ';
         } else {
           // If `minimumCharactersInNumber` is set, do not translate short
           // numbers, e.g. shorter than 2 characters, in order to avoid
@@ -359,9 +357,9 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
             // do nothing - swallow commas and spaces within a number
           }
 
-          // Cannot be false, otherwise `if (previousCharacterIsNumber) {` 
+          // Cannot be false, otherwise `if (previousCharacterIsNumber) {`
           // below will fail for numbers that end with space:
-          previousCharacterIsNumber = true; 
+          previousCharacterIsNumber = true;
           previousCharacterIsChineseNumber = false;
         } else {
           // Normal case:
@@ -375,8 +373,8 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
         clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
-        if (clearChineseNumber === '' && chineseNumber.length === 1) { 
-          // If the 'number' we assembled is actually something like comma, 
+        if (clearChineseNumber === '' && chineseNumber.length === 1) {
+          // If the 'number' we assembled is actually something like comma,
           // space, or multiple commas and spaces, and occurs at the beginning:
           translated += chineseNumber;
         } else {
@@ -422,11 +420,9 @@ ChineseNumber.prototype.addMissingUnits = function (str) {
   var numbers = ChineseNumber.numbers;
   var reverse = ChineseNumber.reverseMultipliers;
 
-   
-
   characters.forEach(function (character, i) {
     if (i === 0) {
-      // For the first character, we don't have a previous character yet, so 
+      // For the first character, we don't have a previous character yet, so
       // just skip it:
       result += character;
     } else {
@@ -455,12 +451,13 @@ ChineseNumber.prototype.addMissingUnits = function (str) {
         var oneOrderSmaller = (parseInt(previousCharacterAsMultiplier) / 10).toString();
         var missingMultiplier = reverse[oneOrderSmaller];
         result += character + missingMultiplier;
-      }
-      else {
+      } else {
         result += character;
       }
     }
   });
+
+  return result;
 };
 
 module.exports = ChineseNumber;
