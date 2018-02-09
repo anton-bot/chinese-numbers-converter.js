@@ -461,5 +461,6 @@ ChineseNumber.prototype.addMissingUnits = function (str) {
       }
     }
   });
+};
 
 module.exports = ChineseNumber;
