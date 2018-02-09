@@ -34,7 +34,6 @@ ChineseNumber.numbers = {
   '仨': 3,
   '３': 3,
 
-
   '肆': 4,
   '四': 4,
   '４': 4,
@@ -83,6 +82,14 @@ ChineseNumber.numbers = {
 ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
 ChineseNumber.afterManMultipliers = ['萬', '萬', '万', '億', '億', '亿'];
 
+/** For converting strings like 8千3萬 into 8千3百萬. */
+ChineseNumber.reverseMultipliers = {
+  '10': '十',
+  '100': '百',
+  '1000': '千',
+  '10000': '萬',
+};
+
 /**
  * Returns the result of the conversion of Chinese number into an `Integer`.
  * @returns {number} The Chinese number converted to integer.
@@ -93,7 +100,14 @@ ChineseNumber.prototype.toInteger = function () {
   var str = this.source.toString();
   var currentPair = [];
 
+  if (str === null || str === undefined || str === '') {
+    throw 'Empty strings cannot be converted.';
+  }
+
   str = str.replace(/[,\s]/g, ''); // remove commas, spaces
+
+  // Convert something like 8千3萬 into 8千3百萬 (8300*10000)
+  str = this.addMissingUnits(str);
 
   // If the number begins with arabic numerals, parse and remove them first.
   // Example: 83萬. This number will be multiplied by the remaining part at
@@ -104,7 +118,7 @@ ChineseNumber.prototype.toInteger = function () {
   if (!isNaN(leadingNumber)) {
     str = str.replace(leadingNumber.toString(), '');
   }
-
+  
   // Now parse the actual Chinese, character by character:
   var len = str.length;
   for (var i = 0; i < len; i++) {
@@ -143,7 +157,7 @@ ChineseNumber.prototype.toInteger = function () {
               // For cases like '萬' in '一千萬' - multiply everything we had
               // so far (like 一千) by the current digit (like 萬).
               var numbersSoFar = 0;
-
+              
               pairs.forEach(function (pair) {
                 numbersSoFar += pair[0] * pair[1];
               });
@@ -220,7 +234,7 @@ ChineseNumber.isNumberOrSpace = function (character) {
   } else {
     return true;
   }
-}
+};
 
 /**
  * Checks whether a character is a Chinese number character.
@@ -318,7 +332,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
           translated += new ChineseNumber(chineseNumber).toInteger();
 
           // Add a space, otherwise 1000萬800呎 will become 10000000800呎
-          translated += ' ';
+          translated += ' '; 
         } else {
           // If `minimumCharactersInNumber` is set, do not translate short
           // numbers, e.g. shorter than 2 characters, in order to avoid
@@ -345,7 +359,9 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
             // do nothing - swallow commas and spaces within a number
           }
 
-          previousCharacterIsNumber = false;
+          // Cannot be false, otherwise `if (previousCharacterIsNumber) {` 
+          // below will fail for numbers that end with space:
+          previousCharacterIsNumber = true; 
           previousCharacterIsChineseNumber = false;
         } else {
           // Normal case:
@@ -359,7 +375,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
         clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
-        if (clearChineseNumber === '' && chineseNumber.length === 1) {
+        if (clearChineseNumber === '' && chineseNumber.length === 1) { 
           // If the 'number' we assembled is actually something like comma, 
           // space, or multiple commas and spaces, and occurs at the beginning:
           translated += chineseNumber;
@@ -376,6 +392,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
         }
       }
 
+      // Still add the current (non-number character) to the translated string:
       translated += character;
 
       // Reset variables:
@@ -393,5 +410,56 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
 
   return translated;
 };
+
+/**
+ * Converts a string like 8千3萬 into 8千3百萬 (8300*10000).
+ * @param {string} str - The original string.
+ * @returns {string} The converted, expanded string.
+ */
+ChineseNumber.prototype.addMissingUnits = function (str) {
+  var characters = str.split('');
+  var result = '';
+  var numbers = ChineseNumber.numbers;
+  var reverse = ChineseNumber.reverseMultipliers;
+
+   
+
+  characters.forEach(function (character, i) {
+    if (i === 0) {
+      // For the first character, we don't have a previous character yet, so 
+      // just skip it:
+      result += character;
+    } else {
+      var arabic = isNaN(character) ? numbers[character] : parseInt(character); // if it's already arabic, just use the arabic number
+      var previousNumber = numbers[characters[i - 1]] || characters[i - 1];
+      var previousCharacterAsMultiplier = reverse[previousNumber.toString().replace('*', '')] ? previousNumber.toString().replace('*', '') : undefined;
+      var nextCharacterArabic = (numbers[characters[i + 1]] || 0).toString().replace('*', '');
+
+      if (
+        // not a multiplier like '*100':
+        typeof arabic === 'number' &&
+
+        // in the 1-9 range:
+        arabic > 0 && arabic < 10 &&
+
+        // previous character is 10, 100, 1000 or 10000:
+        previousCharacterAsMultiplier !== undefined &&
+
+        // e.g. 1000 < 10000 for 8千3萬, or it's the last character in string:
+        (parseInt(previousCharacterAsMultiplier) < parseInt(nextCharacterArabic) || characters[i + 1] === undefined) &&
+
+        // For numbers like 十五, there are no other units to be appended at the end
+        previousCharacterAsMultiplier !== '10'
+      ) {
+        // E.g. for 8千3, add 百:
+        var oneOrderSmaller = (parseInt(previousCharacterAsMultiplier) / 10).toString();
+        var missingMultiplier = reverse[oneOrderSmaller];
+        result += character + missingMultiplier;
+      }
+      else {
+        result += character;
+      }
+    }
+  });
 
 module.exports = ChineseNumber;
