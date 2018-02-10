@@ -379,7 +379,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
           translated += chineseNumber;
         } else {
           // Normal case - it's a real number:
-          if (clearChineseNumber.length >= minimumCharactersInNumber) {
+          if (clearChineseNumber.length >= minimumCharactersInNumber && clearChineseNumber.length > 0) {
             translated += new ChineseNumber(clearChineseNumber).toInteger();
           } else {
             // If `minimumCharactersInNumber` is set, do not translate short
