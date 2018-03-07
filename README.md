@@ -11,7 +11,7 @@ Supports Traditional, Simplified, Financial numbers and some dialects. Only inte
 The `ChineseNumber` class contains these methods: 
 
 - `toInteger()` - converts a Chinese or mixed number into Arabic and returns a JavaScript `Number` type.
-- `toArabicString()` - translates the entire string (possibly with multiple numbers in it) and returns the same string, but with Arabic numbers.
+- `toArabicString(minChars)` - translates the entire string (possibly with multiple numbers in it) and returns the same string, but with Arabic numbers. The optional parameter `minChars` is the minimum number of characters that will be translated. For example, you can set it to `2` to avoid translating `九龍` into `9龍`.
 - `isNumberOrSpace()` - checks whether the character is part of a number (`true`) or unrelated text (`false`).
 
 ```js
@@ -27,16 +27,11 @@ new ChineseNumber('1000 and one').toInteger(); // 1000 - ignore non-Chinese word
 ### Possible unexpected results ###
 
 ```js
-new ChineseNumber(' 二百 or 兩百').toInteger(); // 400 - do not try to parse multiple numbers at once
+new ChineseNumber(' 二百 or 兩百').toInteger(); // 400 - the toInteger() method only parses one number at once. Use toArabicString() instead.
+new ChineseNumber('九龍').toArabicString(); // 9龍 - use the minChars parameter to avoid this
 ```
 
 ## Availability ##
 
 - Standalone JS class - `chinese-numbers.js`
 - NPM package - `chinese-numbers-converter`
-
-## License and contributing ##
-
-Unlicense / Public domain. You can do everything. 
-
-Pull requests and bug reports are welcome. 
