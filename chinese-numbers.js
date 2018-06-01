@@ -107,6 +107,19 @@ ChineseNumber.prototype.toInteger = function () {
   // Convert something like 8千3萬 into 8千3百萬 (8300*10000)
   str = this.addMissingUnits(str);
 
+  // Here we will try to parse the leading part before the 萬 in numbers like
+  // 一百六十八萬, converting it into 168萬. The rest of the code will take care
+  // of the subsequent conversion. This will also work for numbers like 168萬5.
+  let maanLikeCharacterAtTheEnd = this.sourceStringEndsWithAfterManNumber(str);
+  if (maanLikeCharacterAtTheEnd) {
+    let maanLocation = str.lastIndexOf(maanLikeCharacterAtTheEnd);
+    let stringBeforeMaan = str.substring(0, maanLocation);
+    let convertedNumberBeforeMaan = new ChineseNumber(stringBeforeMaan).toInteger();
+    str = convertedNumberBeforeMaan.toString() + str.substr(maanLocation);
+
+    console.log(`Processed str before maan: ${maanLocation} / ${stringBeforeMaan} / ${convertedNumberBeforeMaan} / ${str}`);
+  }
+
   // If the number begins with Arabic numerals, parse and remove them first.
   // Example: 83萬. This number will be multiplied by the remaining part at
   // the end of the function.
@@ -459,5 +472,49 @@ ChineseNumber.prototype.addMissingUnits = function (str) {
 
   return result;
 };
+
+/**
+ * Checks whether the last number in the source string is a [萬万億亿], or
+ * another number. Ignores non-number characters at the end of the string
+ * such as dots, letters etc.
+ * @param {string} str
+ * @returns {string} The maan-like character if the last Chinese number character
+ * in the string is any of the characters 萬万億亿, or null if the last
+ * number in the string is Arabic or a Chinese number other than the four
+ * above.
+ */
+ChineseNumber.prototype.sourceStringEndsWithAfterManNumber = function (str) {
+  if (!str) {
+    return str;
+  }
+
+  // Split string into characters, reverse order:
+  let characters = str.split('').reverse();
+
+  const SINGLE_ARABIC_NUMBER_REGEX = /\d/;
+
+  for (let character of characters) {
+    if (character.match(SINGLE_ARABIC_NUMBER_REGEX)) {
+      // If the string ends with an Arabic number, that's a no. It definitely
+      // doesn't end up with a maan-like character.
+      return null;
+    }
+
+    if (ChineseNumber.afterManMultipliers.includes(character)) {
+      // We found it - the string ends with a maan-like character:
+      return character;
+    }
+
+    if (ChineseNumber.characters.includes(character)) {
+      // We found a non-maan-like character, like 九:
+      return null;
+    }
+
+    // Otherwise keep looping
+  }
+
+  // Fallback case:
+  return null;
+}
 
 module.exports = ChineseNumber;
