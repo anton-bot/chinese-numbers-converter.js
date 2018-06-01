@@ -63,7 +63,7 @@ ChineseNumber.numbers = {
 
   '拾': '*10',
   '十': '*10',
-  '呀': '*10',
+  // '呀': '*10', // causes problems with casual "ah" at the end of sentence
   '廿': '*20',
   '卅': '*30',
   '卌': '*40',
@@ -78,7 +78,7 @@ ChineseNumber.numbers = {
   '亿': '*100000000',
 };
 ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
-ChineseNumber.afterManMultipliers = ['萬', '萬', '万', '億', '億', '亿'];
+ChineseNumber.afterManMultipliers = ['萬', '万', '億', '亿'];
 
 /** For converting strings like 8千3萬 into 8千3百萬. */
 ChineseNumber.reverseMultipliers = {
@@ -107,7 +107,7 @@ ChineseNumber.prototype.toInteger = function () {
   // Convert something like 8千3萬 into 8千3百萬 (8300*10000)
   str = this.addMissingUnits(str);
 
-  // If the number begins with arabic numerals, parse and remove them first.
+  // If the number begins with Arabic numerals, parse and remove them first.
   // Example: 83萬. This number will be multiplied by the remaining part at
   // the end of the function.
   // We're using parseFloat here instead of parseInt in order to have limited
