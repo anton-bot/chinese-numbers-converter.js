@@ -15,7 +15,7 @@
     "chinese-numbers",
     "numbers",
     "arabic",
-	"arabic-numbers",
+    "arabic-numbers",
     "number",
     "numbers-converter",
     "convert",
@@ -23,16 +23,19 @@
     "chinese-numerals",
     "numerals",
     "cantonese",
-	"cantonese-numbers",
-	"cantonese-numerals",
-	"text-utils",
-	"utilities",
-	"asian-languages"
+    "cantonese-numbers",
+    "cantonese-numerals",
+    "text-utils",
+    "utilities",
+    "asian-languages"
   ],
   "author": "Anton Ivanov <anton@ivanov.hk>",
   "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js/issues"
   },
-  "homepage": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js#readme"
+  "homepage": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js#readme",
+  "dependencies": {
+    "should": "^13.2.1"
+  }
 }

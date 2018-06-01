@@ -146,7 +146,7 @@ ChineseNumber.prototype.toInteger = function () {
           pairs.push(currentPair);
           currentPair = [];
         } else {
-          // accumulated two parts of a pair which will be multipled, e.g. 二 + 十
+          // accumulated two parts of a pair which will be multiplied, e.g. 二 + 十
           if (currentPair.length === 2) {
             pairs.push(currentPair);
             currentPair = [];
