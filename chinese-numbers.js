@@ -1,3 +1,5 @@
+const SINGLE_ARABIC_NUMBER_REGEX = /\d/;
+
 /**
  * Converter for Chinese numbers like 1000萬.
  * @param {string} source - The original number string, e.g. 1000萬.
@@ -102,10 +104,30 @@ ChineseNumber.prototype.toInteger = function () {
     throw new Error('Empty strings cannot be converted.');
   }
 
+  // Just a plain Arabic number was provided. Don't do any complicated stuff.
+  if (parseFloat(str).toString() === str.trim()) {
+    return parseFloat(str) || 0;
+  }
+
+  // If the string does not contain Chinese numbers (like "345 abc"), we don't
+  // have any business here:
+  let atLeastOneChineseNumber = false;
+  for (let character of str.split('')) {
+    if (ChineseNumber.characters.includes(character)) {
+      atLeastOneChineseNumber = true;
+      break;
+    }
+  }
+  if (!atLeastOneChineseNumber) {
+    return parseFloat(str) || 0;
+  }
+
   str = str.replace(/[,\s]/g, ''); // remove commas, spaces
 
   // Convert something like 8千3萬 into 8千3百萬 (8300*10000)
   str = this.addMissingUnits(str);
+
+  console.log('UNITS ADDED: ', str);
 
   // Here we will try to parse the leading part before the 萬 in numbers like
   // 一百六十八萬, converting it into 168萬. The rest of the code will take care
@@ -118,21 +140,30 @@ ChineseNumber.prototype.toInteger = function () {
     str = convertedNumberBeforeMaan.toString() + str.substr(maanLocation);
 
     console.log(`Processed str before maan: ${maanLocation} / ${stringBeforeMaan} / ${convertedNumberBeforeMaan} / ${str}`);
+
+    // If the number begins with Arabic numerals, parse and remove them first.
+    // Example: 83萬. This number will be multiplied by the remaining part at
+    // the end of the function.
+    // We're using parseFloat here instead of parseInt in order to have limited
+    // support for decimals, e.g. "3.5萬"
+    var leadingNumber = parseFloat(str);
+    if (!isNaN(leadingNumber)) {
+      str = str.replace(leadingNumber.toString(), '');
+    }
+
+    console.log('STR NOW, ', str);
   }
 
-  // If the number begins with Arabic numerals, parse and remove them first.
-  // Example: 83萬. This number will be multiplied by the remaining part at
-  // the end of the function.
-  // We're using parseFloat here instead of parseInt in order to have limited
-  // support for decimals, e.g. "3.5萬"
-  var leadingNumber = parseFloat(str);
-  if (!isNaN(leadingNumber)) {
-    str = str.replace(leadingNumber.toString(), '');
-  }
+  console.log('BEGINNING TO PARSE STR ', str);
 
   // Now parse the actual Chinese, character by character:
   var len = str.length;
   for (var i = 0; i < len; i++) {
+    if (str[i].match(SINGLE_ARABIC_NUMBER_REGEX)) {
+      // Just a normal arabic number. Add it to the pair.
+      currentPair.push(parseInt(str[i]));
+    }
+
     if (ChineseNumber.numbers[str[i]] !== undefined) {
       var arabic = ChineseNumber.numbers[str[i]]; // e.g. for '三', get 3
 
@@ -144,7 +175,7 @@ ChineseNumber.prototype.toInteger = function () {
         } else {
           currentPair.push(arabic);
         }
-      } else if (typeof (arabic) === 'string' && arabic.indexOf('*') === 0) {
+      } else if (typeof (arabic) === 'string' && arabic.startsWith('*')) {
         // case like '*10000'
         var action = arabic[0];
 
@@ -200,6 +231,8 @@ ChineseNumber.prototype.toInteger = function () {
     currentPair.push(1);
     pairs.push(currentPair);
   }
+
+  console.log('PAIRS: ', pairs);
 
   // Multiply all pairs:
   pairs.forEach(function (pair) {
@@ -490,8 +523,6 @@ ChineseNumber.prototype.sourceStringEndsWithAfterManNumber = function (str) {
 
   // Split string into characters, reverse order:
   let characters = str.split('').reverse();
-
-  const SINGLE_ARABIC_NUMBER_REGEX = /\d/;
 
   for (let character of characters) {
     if (character.match(SINGLE_ARABIC_NUMBER_REGEX)) {
