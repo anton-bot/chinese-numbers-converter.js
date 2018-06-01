@@ -24,7 +24,7 @@ const TESTS = [
   // { before: '8千4百萬', after: 84000000 }, // fail
   // { before: '8千3萬', after: 83000000 }, // fail
   { before: '一百六十八萬', after: 1680000 },
-  { before: '一百六十八萬五', after: 1685000 },
+  { before: '一百六十八萬五', after: 1685000 }, // fail, 85160
   { before: '3.1323445124421445642', after: 3.1323445124421445642 },
   /* { before: '', after:  },
   { before: '', after:  }, */
