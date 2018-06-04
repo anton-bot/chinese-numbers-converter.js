@@ -5,10 +5,11 @@ const ChineseNumber = require('./chinese-numbers');
   // To allow to connect the Chrome debugger:
   await new Promise(resolve => setTimeout(resolve, 5000));
 
-  runTests();
+  await runTests();
+  await runSentenceTests();
 })();
 
-function runTests() {
+async function runTests() {
   const TESTS = [
     { before: '345', after: 345 },
     { before: '345 abc', after: 345 },
@@ -34,6 +35,7 @@ function runTests() {
     { before: '1000萬', after: 10000000 },
     { before: '8千4百萬', after: 84000000 },
     { before: '8千3萬', after: 83000000 },
+    { before: '萬五', after: 15000 },
     { before: '一百六十八萬', after: 1680000 },
     { before: '一百六十八萬五', after: 1685000 },
     { before: '一百六十八萬五', after: 1685000 },
@@ -47,5 +49,21 @@ function runTests() {
     new ChineseNumber(test.before).toInteger().should.equal(test.after);
   }
 
-  console.log('All tests successful.');
+  console.log('All single number tests successful.');
+}
+
+async function runSentenceTests() {
+  const TESTS = [
+    { before: '***貳佰零伍元***', after: '***205元***' },
+    { before: '345 abc', after: '345 abc' },
+	{ before: '3.1323445124421445642', after: '3.1323445124421445642' },
+	{ before: '3, 5 and 4', after: '3, 5 and 4' },
+  ];
+
+  for (let test of TESTS) {
+    console.log(`Testing if ${test.before}=${test.after}...`);
+    new ChineseNumber(test.before).toArabicString().should.equal(test.after);
+  }
+
+  console.log('All sentence tests successful.');
 }

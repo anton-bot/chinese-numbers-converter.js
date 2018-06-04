@@ -134,7 +134,14 @@ ChineseNumber.prototype.toInteger = function () {
   if (maanLikeCharacterAtTheEnd) {
     let maanLocation = str.lastIndexOf(maanLikeCharacterAtTheEnd);
     let stringBeforeMaan = str.substring(0, maanLocation);
-    let convertedNumberBeforeMaan = new ChineseNumber(stringBeforeMaan).toInteger();
+    
+    let convertedNumberBeforeMaan;
+    if (stringBeforeMaan && stringBeforeMaan.trim()) {
+      convertedNumberBeforeMaan = new ChineseNumber(stringBeforeMaan).toInteger();
+    } else {
+      convertedNumberBeforeMaan = 1; // for cases like 萬五
+    }
+    
     str = convertedNumberBeforeMaan.toString() + str.substr(maanLocation);
 
     // If the number begins with Arabic numerals, parse and remove them first.
@@ -398,7 +405,7 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
           if (chineseNumber === '') {
             translated += character;
           } else {
-            // do nothing - swallow commas and spaces within a number
+            chineseNumber += character; // it will be removed later before sending for translation
           }
 
           // Cannot be false, otherwise `if (previousCharacterIsNumber) {`
@@ -416,6 +423,8 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
     } else {
       if (previousCharacterIsNumber) {
         // We reached the end of a Chinese number. Send it for translation now:
+        let trailingCommaMatches = chineseNumber.match(/[,\s]+$/);
+        let trailingCommasOrSpaces = trailingCommaMatches ? trailingCommaMatches[0] : '';
         clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
         if (clearChineseNumber === '' && chineseNumber.length === 1) {
           // If the 'number' we assembled is actually something like comma,
@@ -424,12 +433,12 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
         } else {
           // Normal case - it's a real number:
           if (clearChineseNumber.length >= minimumCharactersInNumber && clearChineseNumber.length > 0) {
-            translated += new ChineseNumber(clearChineseNumber).toInteger();
+            translated += new ChineseNumber(clearChineseNumber).toInteger() + trailingCommasOrSpaces;
           } else {
             // If `minimumCharactersInNumber` is set, do not translate short
             // numbers, e.g. shorter than 2 characters, in order to avoid
             // translating geographic names like 九龍站 into 9龍站.
-            translated += clearChineseNumber;
+            translated += clearChineseNumber + trailingCommasOrSpaces;
           }
         }
       }
