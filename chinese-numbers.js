@@ -80,7 +80,11 @@ ChineseNumber.numbers = {
   '亿': '*100000000',
 };
 ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
+ChineseNumber.characterList = ChineseNumber.characters.join('');
 ChineseNumber.afterManMultipliers = ['萬', '万', '億', '亿'];
+
+/** Matches Chinee numbers, Arabic numbers, and numbers that have no more than one space, dot or comma inside, like 3.45萬 */
+ChineseNumber.NUMBER_IN_STRING_REGEX = new RegExp('(?:\\d+(?:[.,\\s]\\d+)*)*(?:[\\d' + ChineseNumber.characterList + ']+)', 'g');
 
 /** For converting strings like 8千3萬 into 8千3百萬. */
 ChineseNumber.reverseMultipliers = {
@@ -339,127 +343,24 @@ ChineseNumber.isCommaOrSpace = function (character) {
  * @returns {string} The translated string with Arabic numbers only.
  */
 ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
-  minimumCharactersInNumber = minimumCharactersInNumber || 0;
+  minimumCharactersInNumber = minimumCharactersInNumber || 1;
 
-  /**
-   *  This will be the result of this function, the string will all Chinese
-   *  numbers translated to Arabic.
-   */
-  var translated = '';
-
-  /**
-   * Temporary variable to accumulate the Chinese number discovered within a
-   * string.
-   */
-  var chineseNumber = '';
-
-  /** Whether the character in the previous loop iteration was a number. */
-  var previousCharacterIsNumber = false;
-
-  /** Whether the character in the previous loop iteration was a Chinese
-      number. This is because we want to determine the border between two
-      numbers such as 1000萬800呎. */
-  var previousCharacterIsChineseNumber = false;
-
-  // Loop over each character in the string and:
-  // - if it's a normal character, just keep looping and adding characters to
-  //   the translated string.
-  // - if it's a number, keep looping until we find the first non-number
-  //   character. Then, translate the entire chineseNumber string into an
-  //   Arabic number and place it back into the translated string.
-  var clearChineseNumber;
-  this.source.split('').forEach(function (character) {
-    if (ChineseNumber.isNumberOrSpace(character)) {
-      if (previousCharacterIsChineseNumber && ChineseNumber.isChineseNumber(character) === false) {
-        // Special case: we are trying to determine a border between two mixed
-        // Arabic+Chinese numbers, such as 1000萬<we are here>800呎.
-        // Now we found that previous character was a Chinese number, but the
-        // current character is an Arabic number.
-
-        // First, translate the number accumulated so far, e.g. 1000萬
-        if (chineseNumber.length >= minimumCharactersInNumber) {
-          translated += new ChineseNumber(chineseNumber).toInteger();
-
-          // Add a space, otherwise 1000萬800呎 will become 10000000800呎
-          translated += ' ';
+  if (typeof this.source !== 'string') {
+    return this.source;
+  } else {
+    // Replace each number in the string with the tranlation. Before the
+    // translation, we remove spaces from the string for number like
+    // 4,000,000 and 4 000 000.
+    return this.source.replace(
+      ChineseNumber.NUMBER_IN_STRING_REGEX,
+      match => {
+        if (match.length >= minimumCharactersInNumber) {
+          return new ChineseNumber(match.replace(/[,\s]/g, '')).toInteger();
         } else {
-          // If `minimumCharactersInNumber` is set, do not translate short
-          // numbers, e.g. shorter than 2 characters, in order to avoid
-          // translating geographic names like 九龍站 into 9龍站.
-          translated += chineseNumber;
+          return match;
         }
-
-        // Immediately start assembling a new number, e.g. 800:
-        chineseNumber = '';
-        chineseNumber += character;
-
-        previousCharacterIsNumber = true;
-        previousCharacterIsChineseNumber = false;
-      } else {
-        // Normal case:
-        if (ChineseNumber.isCommaOrSpace(character)) {
-          // This is to prevent converting something like 'bot 959' into 'bot959',
-          // i.e. when the space or comma is the first character of a number.
-          // Do it only if it doesn't occur in the middle of a number, i.e.
-          // for 'bot 959' but not for '6,000,000'.
-          if (chineseNumber === '') {
-            translated += character;
-          } else {
-            chineseNumber += character; // it will be removed later before sending for translation
-          }
-
-          // Cannot be false, otherwise `if (previousCharacterIsNumber) {`
-          // below will fail for numbers that end with space:
-          previousCharacterIsNumber = true;
-          previousCharacterIsChineseNumber = false;
-        } else {
-          // Normal case:
-          chineseNumber += character;
-
-          previousCharacterIsNumber = true;
-          previousCharacterIsChineseNumber = ChineseNumber.isChineseNumber(character);
-        }
-      }
-    } else {
-      if (previousCharacterIsNumber) {
-        // We reached the end of a Chinese number. Send it for translation now:
-        let trailingCommaMatches = chineseNumber.match(/[,\s]+$/);
-        let trailingCommasOrSpaces = trailingCommaMatches ? trailingCommaMatches[0] : '';
-        clearChineseNumber = chineseNumber.replace(/[,\s]/g, '');
-        if (clearChineseNumber === '' && chineseNumber.length === 1) {
-          // If the 'number' we assembled is actually something like comma,
-          // space, or multiple commas and spaces, and occurs at the beginning:
-          translated += chineseNumber;
-        } else {
-          // Normal case - it's a real number:
-          if (clearChineseNumber.length >= minimumCharactersInNumber && clearChineseNumber.length > 0) {
-            translated += new ChineseNumber(clearChineseNumber).toInteger() + trailingCommasOrSpaces;
-          } else {
-            // If `minimumCharactersInNumber` is set, do not translate short
-            // numbers, e.g. shorter than 2 characters, in order to avoid
-            // translating geographic names like 九龍站 into 9龍站.
-            translated += clearChineseNumber + trailingCommasOrSpaces;
-          }
-        }
-      }
-
-      // Still add the current (non-number character) to the translated string:
-      translated += character;
-
-      // Reset variables:
-      chineseNumber = '';
-      previousCharacterIsNumber = false;
-      previousCharacterIsChineseNumber = false;
-    }
-  });
-
-  // If the string ends with a number, we didn't trigger the translation of the
-  // last bit yet. So translate it now.
-  if (chineseNumber) {
-    translated += new ChineseNumber(chineseNumber).toInteger();
+      });
   }
-
-  return translated;
 };
 
 /**

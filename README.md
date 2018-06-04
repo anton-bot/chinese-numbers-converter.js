@@ -2,6 +2,8 @@
 
 Small library that converts Chinese numbers into an Arabic `Number`, for example 兩百四十五 into `245`.
 
+Available via NPM, `npm i --save chinese-numbers-converter`.
+
 ## Language support ##
 
 Supports Traditional, Simplified, Financial numbers and some dialects. Only integers are supported, except the limited support for Arabic decimal + Chinese number, like "3.5萬". The largest supported character is 億/亿.
@@ -22,6 +24,9 @@ new ChineseNumber(' 二〇一二年').toInteger(); // 2012 - Phone, year etc: wi
 new ChineseNumber('卅六').toInteger(); // 36 - Cantonese slang
 new ChineseNumber('***貳佰零伍元***').toInteger(); // 205 - finance numbers 
 new ChineseNumber('1000 and one').toInteger(); // 1000 - ignore non-Chinese words
+
+// Strings with multiple numbers:
+new ChineseNumber('這款車的價格從34.5萬港幣到55.4萬港幣。').toArabicString(); "這款車的價格從345000港幣到554000港幣。" - multiple numbers OK
 ```
 
 ### Possible unexpected results ###
@@ -29,9 +34,12 @@ new ChineseNumber('1000 and one').toInteger(); // 1000 - ignore non-Chinese word
 ```js
 new ChineseNumber(' 二百 or 兩百').toInteger(); // 400 - the toInteger() method only parses one number at once. Use toArabicString() instead.
 new ChineseNumber('九龍').toArabicString(); // 9龍 - use the minChars parameter to avoid this
+new ChineseNumber('4,5萬').toArabicString(); // 450000 - use dot instead of comma for decimals, e.g. 4.52萬
+new ChineseNumber('4.52萬').toArabicString(); // 45199.99999999999 - JavaScript decimal issues
+new ChineseNumber('***3.1323445124421445001***').toArabicString(); // 3.1323445124421445 - the decimal part is too long for JavaScript, so it is rounded
 ```
 
 ## Availability ##
 
-- Standalone JS class - `chinese-numbers.js`
+- Standalone JS for browsers - `chinese-numbers.js` - coming soon
 - NPM package - `chinese-numbers-converter`
