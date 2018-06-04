@@ -41,5 +41,5 @@ new ChineseNumber('***3.1323445124421445001***').toArabicString(); // 3.13234451
 
 ## Availability ##
 
-- Standalone JS for browsers - `chinese-numbers.js` - coming soon
-- NPM package - `chinese-numbers-converter`
+- NPM package - `chinese-numbers-converter`;
+- Browser - use `Browserify` after converting the code to ES2015 standard using `Babel`.
