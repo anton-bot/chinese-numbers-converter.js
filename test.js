@@ -64,7 +64,8 @@ async function runSentenceTests() {
     { before: '一百. What a great number.', after: '100. What a great number.' },
     { before: '4 000 000', after: '4000000' },
     { before: '4 000 000 RMB', after: '4000000 RMB' },
-    { before: '這款車的價格從34.5萬港幣到55.4萬港幣。', after: '這款車的價格從345000港幣到554000港幣。'}
+    { before: '這款車的價格從34.5萬港幣到55.4萬港幣。', after: '這款車的價格從345000港幣到554000港幣。' },
+    { before: '三到四百萬', after: '3到4000000' },
   ];
 
   for (let test of TESTS) {
