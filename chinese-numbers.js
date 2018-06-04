@@ -127,19 +127,15 @@ ChineseNumber.prototype.toInteger = function () {
   // Convert something like 8千3萬 into 8千3百萬 (8300*10000)
   str = this.addMissingUnits(str);
 
-  console.log('UNITS ADDED: ', str);
-
   // Here we will try to parse the leading part before the 萬 in numbers like
   // 一百六十八萬, converting it into 168萬. The rest of the code will take care
-  // of the subsequent conversion. This will also work for numbers like 168萬5.
+  // of the subsequent conversion. This must also work for numbers like 168萬5.
   let maanLikeCharacterAtTheEnd = this.sourceStringEndsWithAfterManNumber(str);
   if (maanLikeCharacterAtTheEnd) {
     let maanLocation = str.lastIndexOf(maanLikeCharacterAtTheEnd);
     let stringBeforeMaan = str.substring(0, maanLocation);
     let convertedNumberBeforeMaan = new ChineseNumber(stringBeforeMaan).toInteger();
     str = convertedNumberBeforeMaan.toString() + str.substr(maanLocation);
-
-    console.log(`Processed str before maan: ${maanLocation} / ${stringBeforeMaan} / ${convertedNumberBeforeMaan} / ${str}`);
 
     // If the number begins with Arabic numerals, parse and remove them first.
     // Example: 83萬. This number will be multiplied by the remaining part at
@@ -150,11 +146,7 @@ ChineseNumber.prototype.toInteger = function () {
     if (!isNaN(leadingNumber)) {
       str = str.replace(leadingNumber.toString(), '');
     }
-
-    console.log('STR NOW, ', str);
   }
-
-  console.log('BEGINNING TO PARSE STR ', str);
 
   // Now parse the actual Chinese, character by character:
   var len = str.length;
@@ -185,7 +177,8 @@ ChineseNumber.prototype.toInteger = function () {
         currentPair.push(arabic);
 
         if (i === 0 && action === '*') {
-          // This is a case like 2千萬", where the first character will be 千:
+          // This is a case like 2千萬", where the first character will be 千,
+          // because "2" was cut off and stored in the leadingNumber:
           currentPair.push(1);
           pairs.push(currentPair);
           currentPair = [];
@@ -232,7 +225,9 @@ ChineseNumber.prototype.toInteger = function () {
     pairs.push(currentPair);
   }
 
-  console.log('PAIRS: ', pairs);
+  if (pairs.length > 0 && !isNaN(leadingNumber)) {
+    pairs[0][0] *= leadingNumber; // e.g. 83萬 => 83 * [10000, 1]
+  }
 
   // Multiply all pairs:
   pairs.forEach(function (pair) {
@@ -240,13 +235,16 @@ ChineseNumber.prototype.toInteger = function () {
   });
 
   // For cases like 83萬
+  /*
   if (!isNaN(leadingNumber)) {
     if (pairs.length === 0) {
+      // later note: cases like "800 " should be already handled early in the code
       result = leadingNumber; // otherwise multiplying by zero, e.g. "800 " => 0 * 800
     } else {
       result *= leadingNumber;
     }
   }
+  */
 
   return result;
 };
@@ -528,7 +526,7 @@ ChineseNumber.prototype.sourceStringEndsWithAfterManNumber = function (str) {
     if (character.match(SINGLE_ARABIC_NUMBER_REGEX)) {
       // If the string ends with an Arabic number, that's a no. It definitely
       // doesn't end up with a maan-like character.
-      return null;
+      // return null;
     }
 
     if (ChineseNumber.afterManMultipliers.includes(character)) {
@@ -538,7 +536,7 @@ ChineseNumber.prototype.sourceStringEndsWithAfterManNumber = function (str) {
 
     if (ChineseNumber.characters.includes(character)) {
       // We found a non-maan-like character, like 九:
-      return null;
+      // return null;
     }
 
     // Otherwise keep looping
