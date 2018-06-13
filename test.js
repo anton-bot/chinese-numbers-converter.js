@@ -42,6 +42,7 @@ async function runTests() {
     { before: '一百六十八萬六千', after: 1686000 },
     { before: '一百六十八萬五千兩百四十五', after: 1685245 },
     { before: '3.1323445124421445642', after: 3.1323445124421445642 },
+    // { before: '2億5', after: 250000000 }, // fail, 200000005
   ];
 
   for (let test of TESTS) {
