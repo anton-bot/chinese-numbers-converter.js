@@ -1,6 +1,6 @@
 {
   "name": "chinese-numbers-converter",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Converts Chinese numerals in a string into Arabic numerals.",
   "main": "chinese-numbers.js",
   "scripts": {
@@ -36,6 +36,6 @@
   },
   "homepage": "https://github.com/catcher-in-the-try/chinese-numbers-converter.js#readme",
   "dependencies": {
-    "should": "^13.2.1"
+    "should": "^13.2.3"
   }
 }

@@ -85,8 +85,11 @@ ChineseNumber.characters = Object.keys(ChineseNumber.numbers);
 ChineseNumber.characterList = ChineseNumber.characters.join('');
 ChineseNumber.afterManMultipliers = ['萬', '万', '億', '亿'];
 
-/** Matches Chinee numbers, Arabic numbers, and numbers that have no more than one space, dot or comma inside, like 3.45萬 */
-ChineseNumber.NUMBER_IN_STRING_REGEX = new RegExp('(?:\\d+(?:[.,\\s]\\d+)*)*(?:[\\d' + ChineseNumber.characterList + ']+)', 'g');
+/** 
+ *  Matches Chinee numbers, Arabic numbers, and numbers that have no more than one space, dot or comma inside, like 3.45萬.
+ *  It also ignores leading zeroes at the start of the number - see simplified demo here: https://regex101.com/r/7bPFy4/1
+ */
+ChineseNumber.NUMBER_IN_STRING_REGEX = new RegExp('(?![0]+)(?:(?:\\d+(?:[.,\\s]\\d+)*)*)(?:[\\d' + ChineseNumber.characterList + ']+)', 'g');
 
 /** For converting strings like 8千3萬 into 8千3百萬. */
 ChineseNumber.reverseMultipliers = {
