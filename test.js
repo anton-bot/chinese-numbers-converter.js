@@ -68,6 +68,7 @@ async function runSentenceTests() {
     { before: '這款車的價格從34.5萬港幣到55.4萬港幣。', after: '這款車的價格從345000港幣到554000港幣。' },
     { before: '三到四百萬', after: '3到4000000' },
     { before: 'sample0123@example.com', after: 'sample0123@example.com' }, // do not convert 0123 to 123 inside a word
+    { before: '參', after: '參' }, // do not convert outdated financial variant
   ];
 
   for (let test of TESTS) {

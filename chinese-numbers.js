@@ -32,7 +32,10 @@ ChineseNumber.numbers = {
   '俩': 2,
   '２': 2,
 
-  '參': 3,
+  // Outdated financial number variant which is commonly used as a normal word,
+  // which causes false positives:
+  // '參': 3,
+
   '叁': 3,
   '三': 3,
   '仨': 3,
