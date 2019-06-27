@@ -8,3 +8,5 @@ import { CHARACTER_LIST } from '../types/SupportedChineseNumber';
 export const NUMBER_IN_STRING_REGEX: RegExp = new RegExp(
   '(?![0]+)(?:(?:\\d+(?:[.,\\s]\\d+)*)*)(?:[\\d' + CHARACTER_LIST + ']+)', 'g'
 );
+
+export const SINGLE_ARABIC_NUMBER_REGEX = /\d/;

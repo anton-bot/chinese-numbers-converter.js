@@ -1,11 +1,4 @@
-const SINGLE_ARABIC_NUMBER_REGEX = /\d/;
 
-/**
- * Converter for Chinese numbers like 1000萬.
- * @param {string} source - The original number string, e.g. 1000萬.
- * @returns {ChineseNumber}
- * @constructor
- */
 var ChineseNumber = function (source) {
   this.source = source;
   return this;
@@ -269,49 +262,6 @@ ChineseNumber.prototype.toInteger = function () {
 };
 
 /**
- * Checks whether a character is a Chinese number character.
- * @param {number|string} A single character to be checked.
- * @returns {boolean} True if it's a Chinese number character or Chinese-style
- * Arabic numbers (０-９).
- */
-ChineseNumber.isChineseNumber = function (character) {
-  if (character === null || character === undefined || character.toString().length !== 1) {
-    throw new Error('Function isChineseNumber expects exactly one character.');
-  }
-
-  return ChineseNumber.characters.indexOf(character) !== -1;
-};
-
-/**
- * Checks whether a character is an Arabic number [0-9] and not a Chinese
- * number or another character.
- * @returns {boolean} True if character is from 0 to 9.
- */
-ChineseNumber.isArabicNumber = function (character) {
-  if (character === null || character === undefined || character.toString().length !== 1) {
-    throw new Error('Function isArabicNumber expects exactly one character.');
-  }
-
-  var arabicNumbers = '0123456789０１２３４５６７８９';
-  return arabicNumbers.indexOf(character) !== -1; // true if found
-};
-
-/**
- * Checks whether the character is a comma or space, i.e. a character that
- * can occur within a number (1,000,000) but is not a number itself.
- * @returns {boolean} True if the character is a comma or space.
- */
-ChineseNumber.isCommaOrSpace = function (character) {
-  if (character === null || character === undefined || character.toString().length !== 1) {
-    throw new Error('Function isCommaOrSpace expects exactly one character.');
-  }
-
-  var charactersWithinNumber = ',. ';
-
-  return charactersWithinNumber.indexOf(character) !== -1;
-};
-
-/**
  * Converts multiple Chinese numbers in a string into Arabic numbers, and
  * returns the translated string containing the original text but with Arabic
  * numbers only.
@@ -340,57 +290,6 @@ ChineseNumber.prototype.toArabicString = function (minimumCharactersInNumber) {
         }
       });
   }
-};
-
-/**
- * Converts a string like 8千3萬 into 8千3百萬 (8300*10000).
- * @param {string} str - The original string.
- * @returns {string} The converted, expanded string.
- */
-ChineseNumber.prototype.addMissingUnits = function (str) {
-  var characters = str.split('');
-  var result = '';
-  var numbers = ChineseNumber.numbers;
-  var reverse = ChineseNumber.reverseMultipliers;
-
-  characters.forEach(function (character, i) {
-    if (i === 0) {
-      // For the first character, we don't have a previous character yet, so
-      // just skip it:
-      result += character;
-    } else {
-      var arabic = isNaN(character) ? numbers[character] : parseInt(character); // if it's already arabic, just use the arabic number
-      var previousNumber = numbers[characters[i - 1]] || characters[i - 1];
-      var previousCharacterAsMultiplier = reverse[previousNumber.toString().replace('*', '')] ? previousNumber.toString().replace('*', '') : undefined;
-      var nextCharacterArabic = (numbers[characters[i + 1]] || 0).toString().replace('*', '');
-
-      if (
-        // not a multiplier like '*100':
-        typeof arabic === 'number' &&
-
-        // in the 1-9 range:
-        arabic > 0 && arabic < 10 &&
-
-        // previous character is 10, 100, 1000 or 10000:
-        previousCharacterAsMultiplier !== undefined &&
-
-        // e.g. 1000 < 10000 for 8千3萬, or it's the last character in string:
-        (parseInt(previousCharacterAsMultiplier) < parseInt(nextCharacterArabic) || characters[i + 1] === undefined) &&
-
-        // For numbers like 十五, there are no other units to be appended at the end
-        previousCharacterAsMultiplier !== '10'
-      ) {
-        // E.g. for 8千3, add 百:
-        var oneOrderSmaller = (parseInt(previousCharacterAsMultiplier) / 10).toString();
-        var missingMultiplier = reverse[oneOrderSmaller];
-        result += character + missingMultiplier;
-      } else {
-        result += character;
-      }
-    }
-  });
-
-  return result;
 };
 
 /**
