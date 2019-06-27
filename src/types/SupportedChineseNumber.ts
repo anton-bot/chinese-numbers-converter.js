@@ -55,7 +55,7 @@ export type SupportedChineseNumber =
   | '億'
   | '亿';
 
-export const SUPPORTED_CHINESE_NUMBERS: SupportedChineseNumber[] = [
+export const SUPPORTED_CHINESE_NUMBERS: string[] = [
   '零',
   '〇',
   '０',
