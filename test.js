@@ -1,5 +1,5 @@
 const should = require('should');
-const ChineseNumber = require('./chinese-numbers');
+const ChineseNumber = require('./chinese-numbers-old');
 
 (async () => {
   // To allow to connect the Chrome debugger:
