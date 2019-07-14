@@ -1,7 +1,7 @@
-import { SupportedChineseNumber } from '../types/SupportedChineseNumber';
+import { SupportedChineseNumeral } from '../types/SupportedChineseNumber';
 
 /** Chinese number characters and their Arabic equivalent. */
-export const CHINESE_TO_ARABIC: Record<SupportedChineseNumber, number | string> = {
+export const CHINESE_TO_ARABIC: Record<SupportedChineseNumeral, number | string> = {
   '零': 0,
   '〇': 0,
   '０': 0,

@@ -20,7 +20,7 @@ const SENTENCE_TESTS = [
 describe('Full sentences', () => {
   SENTENCE_TESTS.map(({ before, after }) => {
     it(`"${before}" must equal "${after}"`, () => {
-      expect(new ChineseNumber(before).toInteger()).toEqual(after);
+      expect(new ChineseNumber(before).toArabicString()).toEqual(after);
     });
   });
 });

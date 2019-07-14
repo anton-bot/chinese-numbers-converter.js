@@ -10,5 +10,5 @@ export function isArabicNumber(character: string): boolean {
     throw new Error('Function isArabicNumber expects exactly one character.');
   }
 
-  return ARABIC_NUMBERS.includes(character); // true if found
+  return ARABIC_NUMBERS.includes(character);
 }

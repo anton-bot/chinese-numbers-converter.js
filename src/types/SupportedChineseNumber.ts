@@ -1,4 +1,4 @@
-export type SupportedChineseNumber =
+export type SupportedChineseNumeral =
   | '零'
   | '〇'
   | '０'
@@ -114,3 +114,7 @@ export const SUPPORTED_CHINESE_NUMBERS: string[] = [
 ];
 
 export const CHARACTER_LIST: string = SUPPORTED_CHINESE_NUMBERS.join('');
+
+export function isSupportedChineseNumeral(character: string | SupportedChineseNumeral): character is SupportedChineseNumeral {
+  return SUPPORTED_CHINESE_NUMBERS.includes(character);
+}
